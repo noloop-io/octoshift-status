@@ -1,0 +1,48 @@
+# The status page's checker (→ D-73). Every five minutes — GitHub's shortest schedule,
+# and it may run a few minutes late under load, which the page allows for — it checks
+# every component and commits the result to the `checks` branch.
+name: Check
+
+on:
+    schedule:
+        - cron: '*/5 * * * *'
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+concurrency:
+    group: check
+    cancel-in-progress: false
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        timeout-minutes: 3
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Check out the checks branch
+              run: |
+                  git fetch origin checks:checks 2>/dev/null || true
+                  if git show-ref --verify --quiet refs/heads/checks; then
+                    git worktree add data checks
+                  else
+                    git worktree add --orphan -b checks data
+                  fi
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Check every component
+              run: node check.mjs data/checks.json
+
+            - name: Commit the result
+              working-directory: data
+              run: |
+                  git config user.name 'status-checker'
+                  git config user.email 'status-checker@users.noreply.github.com'
+                  git add checks.json
+                  git commit --quiet -m "Check $(date -u +%Y-%m-%dT%H:%MZ)" || exit 0
+                  git push --quiet origin checks

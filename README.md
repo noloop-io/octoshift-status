@@ -27,11 +27,5 @@ post on the status page after recovery, with the real start and end times.
 1. Settings → Pages → Build and deployment: **Deploy from a branch**, `main`, `/ (root)`.
 2. Custom domain: the host in `CNAME`; DNS: a `CNAME` record from it to
    `<owner>.github.io`. Tick **Enforce HTTPS** once the certificate is issued.
-3. Settings → Actions → General → Workflow permissions: **Read and write**.
-
-## Not live yet
-
-This repository was created ahead of launch. The first `php artisan status:publish`
-with `STATUS_PUBLISHER=github` replaces this commit with the site and the checker. The
-checker is deliberately not here yet: until production exists, every check would report an
-outage of a service that has not launched.
+3. Nothing to change for the checker's permission: its workflow asks for `contents: write`
+   itself, which works even where the organisation's default is read-only.
