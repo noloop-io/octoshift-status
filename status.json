@@ -1,14 +1,14 @@
 {
-    "updated_at": "2026-10-08T21:00:05+00:00",
+    "updated_at": "2026-10-08T22:00:05+00:00",
     "overall": "operational",
     "components": {
-        "app": "unknown",
+        "app": "operational",
         "punches": "operational",
         "notifications": "operational",
         "ergani_sends": "operational",
         "ergani": "operational",
-        "website": "unknown",
-        "api": "unknown"
+        "website": "operational",
+        "api": "operational"
     },
     "active": []
 }
