@@ -62,16 +62,16 @@ async function check(url) {
 }
 
 const results = await Promise.all(
-    Object.entries(components).map(async ([key, url]) => [
+    Object.entries(components).map(async ([key, url]) => ({
         key,
-        await check(url),
-    ]),
+        result: await check(url),
+    })),
 );
 
 const output = { generated_at: now.toISOString(), components: {}, days: {} };
 const cutoff = new Date(now.getTime() - KEEP_DAYS * 86_400_000);
 
-for (const [key, result] of results) {
+for (const { key, result } of results) {
     const before = previous.components?.[key];
     const since =
         before && before.ok === result.ok && before.since
@@ -80,7 +80,7 @@ for (const [key, result] of results) {
 
     output.components[key] = { ...result, since };
 
-    const days = { ...(previous.days?.[key] ?? {}) };
+    const days = { ...previous.days?.[key] };
     const [good, total] = days[today] ?? [0, 0];
     days[today] = [good + (result.ok ? 1 : 0), total + 1];
 
@@ -95,7 +95,7 @@ for (const [key, result] of results) {
 
 await writeFile(target, JSON.stringify(output) + '\n');
 
-for (const [key, result] of results) {
+for (const { key, result } of results) {
     console.log(
         `${result.ok ? 'up  ' : 'DOWN'} ${key} ${result.status} ${result.ms}ms`,
     );
